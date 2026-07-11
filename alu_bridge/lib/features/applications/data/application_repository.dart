@@ -14,6 +14,12 @@ class ApplicationRepository {
   CollectionReference<Map<String, dynamic>> get _applications =>
       _firestore.collection('applications');
 
+  Future<Application?> fetchById(String appId) async {
+    final doc = await _applications.doc(appId).get();
+    if (!doc.exists) return null;
+    return Application.fromMap(doc.data()!, doc.id);
+  }
+
   Future<bool> hasApplied({required String oppId, required String studentUid}) async {
     final snapshot = await _applications
         .where('oppId', isEqualTo: oppId)
@@ -62,6 +68,20 @@ class ApplicationRepository {
 
   Stream<List<Application>> watchByStudent(String studentUid) {
     return _applications.where('studentUid', isEqualTo: studentUid).snapshots().map(_sorted);
+  }
+
+  Stream<List<Application>> watchByVenture(String ventureId) {
+    return _applications.where('ventureId', isEqualTo: ventureId).snapshots().map(_sorted);
+  }
+
+  Future<void> updateStatus(String appId, ApplicationStatus status, {String? note}) {
+    final now = DateTime.now();
+    final entry = TimelineEntry(status: status, at: now, note: note);
+    return _applications.doc(appId).update({
+      'status': status.value,
+      'updatedAt': Timestamp.fromDate(now),
+      'timeline': FieldValue.arrayUnion([entry.toMap()]),
+    });
   }
 
   List<Application> _sorted(QuerySnapshot<Map<String, dynamic>> snapshot) {

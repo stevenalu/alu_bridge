@@ -8,8 +8,12 @@ import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/section_divider.dart';
 import '../../core/widgets/status_pill.dart';
 import '../../core/widgets/verified_badge.dart';
+import '../applications/bloc/applicants_bloc.dart';
+import '../applications/data/application_repository.dart';
+import '../applications/view/applicants_page.dart';
 import '../auth/bloc/auth_bloc.dart';
 import '../auth/bloc/auth_event.dart';
+import '../messaging/view/conversations_page.dart';
 import '../opportunities/data/opportunity_repository.dart';
 import '../opportunities/models/opportunity.dart';
 import '../opportunities/view/manage_roles_page.dart';
@@ -17,6 +21,7 @@ import '../opportunities/view/post_role_page.dart';
 import '../ventures/cubit/venture_cubit.dart';
 import '../ventures/data/venture_repository.dart';
 import '../ventures/models/venture.dart';
+import '../ventures/view/venture_profile_page.dart';
 import '../ventures/view/verification_pending_page.dart';
 import '../ventures/view/verify_venture_page.dart';
 
@@ -81,6 +86,31 @@ class _FounderShellState extends State<FounderShell> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 return ManageRolesPage(venture: venture);
+              },
+            ),
+          2 => BlocBuilder<VentureCubit, VentureState>(
+              builder: (context, state) {
+                final venture = state.venture;
+                if (venture == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return BlocProvider(
+                  create: (_) => ApplicantsBloc(
+                    applicationRepository: sl<ApplicationRepository>(),
+                    ventureId: venture.id,
+                  )..add(const ApplicantsSubscriptionRequested()),
+                  child: const ApplicantsPage(),
+                );
+              },
+            ),
+          3 => ConversationsPage(currentUid: context.read<AuthBloc>().state.user!.uid),
+          4 => BlocBuilder<VentureCubit, VentureState>(
+              builder: (context, state) {
+                final venture = state.venture;
+                if (venture == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return VentureProfilePage(venture: venture);
               },
             ),
           _ => Center(child: Text(_tabs[_index])),

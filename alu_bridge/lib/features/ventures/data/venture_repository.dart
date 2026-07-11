@@ -18,6 +18,12 @@ class VentureRepository {
         );
   }
 
+  Future<Venture?> fetchById(String ventureId) async {
+    final doc = await _ventures.doc(ventureId).get();
+    if (!doc.exists) return null;
+    return Venture.fromMap(doc.data()!, doc.id);
+  }
+
   Future<Venture?> fetchByFounder(String founderUid) async {
     final snapshot =
         await _ventures.where('founderUid', isEqualTo: founderUid).limit(1).get();
