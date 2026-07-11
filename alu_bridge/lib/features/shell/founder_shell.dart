@@ -9,6 +9,7 @@ import '../../core/widgets/status_pill.dart';
 import '../../core/widgets/verified_badge.dart';
 import '../auth/bloc/auth_bloc.dart';
 import '../auth/bloc/auth_event.dart';
+import '../opportunities/view/manage_roles_page.dart';
 import '../ventures/cubit/venture_cubit.dart';
 import '../ventures/data/venture_repository.dart';
 import '../ventures/models/venture.dart';
@@ -66,7 +67,19 @@ class _FounderShellState extends State<FounderShell> {
             ),
           ],
         ),
-        body: _index == 0 ? const _DashboardTab() : Center(child: Text(_tabs[_index])),
+        body: switch (_index) {
+          0 => const _DashboardTab(),
+          1 => BlocBuilder<VentureCubit, VentureState>(
+              builder: (context, state) {
+                final venture = state.venture;
+                if (venture == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return ManageRolesPage(venture: venture);
+              },
+            ),
+          _ => Center(child: Text(_tabs[_index])),
+        },
         bottomNavigationBar: NavigationBar(
           selectedIndex: _index,
           onDestinationSelected: (index) => setState(() => _index = index),

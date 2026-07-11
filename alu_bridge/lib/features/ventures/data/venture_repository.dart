@@ -18,6 +18,13 @@ class VentureRepository {
         );
   }
 
+  Future<Venture?> fetchByFounder(String founderUid) async {
+    final snapshot =
+        await _ventures.where('founderUid', isEqualTo: founderUid).limit(1).get();
+    if (snapshot.docs.isEmpty) return null;
+    return Venture.fromMap(snapshot.docs.first.data(), snapshot.docs.first.id);
+  }
+
   Future<void> submitForVerification({
     String? ventureId,
     required String founderUid,
