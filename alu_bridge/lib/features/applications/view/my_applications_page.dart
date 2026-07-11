@@ -5,6 +5,7 @@ import '../../../core/extensions/date_extensions.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/empty_view.dart';
+import '../../../core/widgets/loading_list.dart';
 import '../../../core/widgets/status_pill.dart';
 import '../../opportunities/widgets/match_chip.dart';
 import '../bloc/applications_bloc.dart';
@@ -20,7 +21,7 @@ class MyApplicationsPage extends StatelessWidget {
     return BlocBuilder<ApplicationsBloc, ApplicationsState>(
       builder: (context, state) {
         if (state.status == ApplicationsStatus.loading) {
-          return const Center(child: CircularProgressIndicator());
+          return const LoadingList();
         }
         if (state.applications.isEmpty) {
           return const EmptyView(message: 'You have not applied to any roles yet.');

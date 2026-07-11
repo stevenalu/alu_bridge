@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../bootstrap.dart';
 import '../../../core/widgets/empty_view.dart';
+import '../../../core/widgets/loading_list.dart';
 import '../../ventures/models/venture.dart';
 import '../data/opportunity_repository.dart';
 import '../models/opportunity.dart';
@@ -64,7 +65,7 @@ class _ManageRolesPageState extends State<ManageRolesPage> {
                 );
               }
               if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
+                return const LoadingList();
               }
               final roles =
                   snapshot.data!.where((o) => o.status == _filter).toList();

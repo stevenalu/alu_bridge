@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/widgets/empty_view.dart';
+import '../../../core/widgets/loading_list.dart';
 import '../bloc/discovery_bloc.dart';
 import '../widgets/opportunity_card.dart';
 import 'filters_sheet.dart';
@@ -43,7 +44,7 @@ class ExplorePage extends StatelessWidget {
           child: BlocBuilder<DiscoveryBloc, DiscoveryState>(
             builder: (context, state) {
               if (state.status == DiscoveryStatus.loading) {
-                return const Center(child: CircularProgressIndicator());
+                return const LoadingList();
               }
               final roles = state.visible;
               if (roles.isEmpty) {
