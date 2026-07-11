@@ -53,8 +53,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthState(status: state.status, user: state.user, isSubmitting: true));
     try {
-      await _authRepository.signIn(email: event.email, password: event.password);
-      emit(AuthState(status: state.status, user: state.user));
+      final appUser = await _authRepository.signIn(
+        email: event.email,
+        password: event.password,
+      );
+      emit(AuthState(status: AuthStatus.authenticated, user: appUser));
     } on AuthException catch (e) {
       emit(AuthState(status: state.status, user: state.user, failure: e.message));
     } catch (_) {
@@ -74,13 +77,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthState(status: state.status, user: state.user, isSubmitting: true));
     try {
-      await _authRepository.signUp(
+      final appUser = await _authRepository.signUp(
         email: event.email,
         password: event.password,
         fullName: event.fullName,
         role: event.role,
       );
-      emit(AuthState(status: state.status, user: state.user));
+      emit(AuthState(status: AuthStatus.authenticated, user: appUser));
     } on AuthException catch (e) {
       emit(AuthState(status: state.status, user: state.user, failure: e.message));
     } catch (_) {
