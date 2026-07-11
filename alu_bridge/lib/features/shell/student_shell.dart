@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bootstrap.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/primary_button.dart';
+import '../applications/bloc/applications_bloc.dart';
+import '../applications/data/application_repository.dart';
+import '../applications/view/my_applications_page.dart';
 import '../auth/bloc/auth_bloc.dart';
 import '../auth/bloc/auth_event.dart';
 import '../opportunities/bloc/discovery_bloc.dart';
@@ -24,6 +27,7 @@ class StudentShell extends StatefulWidget {
 class _StudentShellState extends State<StudentShell> {
   int _index = 0;
   late final DiscoveryBloc _discoveryBloc;
+  late final ApplicationsBloc _applicationsBloc;
 
   static const _tabs = ['Home', 'Explore', 'Applications', 'Messages', 'Profile'];
   static const _icons = [
@@ -43,18 +47,26 @@ class _StudentShellState extends State<StudentShell> {
       profileRepository: sl<ProfileRepository>(),
       studentUid: uid,
     )..add(const DiscoverySubscriptionRequested());
+    _applicationsBloc = ApplicationsBloc(
+      applicationRepository: sl<ApplicationRepository>(),
+      studentUid: uid,
+    )..add(const ApplicationsSubscriptionRequested());
   }
 
   @override
   void dispose() {
     _discoveryBloc.close();
+    _applicationsBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _discoveryBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _discoveryBloc),
+        BlocProvider.value(value: _applicationsBloc),
+      ],
       child: Scaffold(
         appBar: AppBar(
           title: Text(_tabs[_index]),
@@ -69,6 +81,7 @@ class _StudentShellState extends State<StudentShell> {
         body: switch (_index) {
           0 => const _HomeTab(),
           1 => const ExplorePage(),
+          2 => const MyApplicationsPage(),
           _ => Center(child: Text(_tabs[_index])),
         },
         bottomNavigationBar: NavigationBar(
