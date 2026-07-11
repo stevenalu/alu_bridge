@@ -57,6 +57,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthState(status: state.status, user: state.user));
     } on AuthException catch (e) {
       emit(AuthState(status: state.status, user: state.user, failure: e.message));
+    } catch (_) {
+      emit(
+        AuthState(
+          status: state.status,
+          user: state.user,
+          failure: 'Something went wrong. Please try again.',
+        ),
+      );
     }
   }
 
@@ -75,6 +83,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthState(status: state.status, user: state.user));
     } on AuthException catch (e) {
       emit(AuthState(status: state.status, user: state.user, failure: e.message));
+    } catch (_) {
+      emit(
+        AuthState(
+          status: state.status,
+          user: state.user,
+          failure: 'Something went wrong. Please try again.',
+        ),
+      );
     }
   }
 
@@ -95,6 +111,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthState(status: state.status, user: state.user, resetEmailSent: true));
     } on AuthException catch (e) {
       emit(AuthState(status: state.status, user: state.user, failure: e.message));
+    } catch (_) {
+      emit(
+        AuthState(
+          status: state.status,
+          user: state.user,
+          failure: 'Something went wrong. Please try again.',
+        ),
+      );
     }
   }
 
