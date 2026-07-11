@@ -11,19 +11,21 @@ class OpportunityRepository {
       _firestore.collection('opportunities');
 
   Stream<List<Opportunity>> watchByVenture(String ventureId) {
-    return _opportunities
-        .where('ventureId', isEqualTo: ventureId)
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((s) => s.docs.map((d) => Opportunity.fromMap(d.data(), d.id)).toList());
+    return _opportunities.where('ventureId', isEqualTo: ventureId).snapshots().map(_sorted);
   }
 
   Stream<List<Opportunity>> watchLive() {
     return _opportunities
         .where('status', isEqualTo: OpportunityStatus.live.name)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((s) => s.docs.map((d) => Opportunity.fromMap(d.data(), d.id)).toList());
+        .map(_sorted);
+  }
+
+  List<Opportunity> _sorted(QuerySnapshot<Map<String, dynamic>> snapshot) {
+    final opportunities =
+        snapshot.docs.map((d) => Opportunity.fromMap(d.data(), d.id)).toList();
+    opportunities.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return opportunities;
   }
 
   Future<String> save(Opportunity opportunity) async {

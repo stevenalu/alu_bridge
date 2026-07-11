@@ -57,6 +57,12 @@ class _ManageRolesPageState extends State<ManageRolesPage> {
           child: StreamBuilder<List<Opportunity>>(
             stream: sl<OpportunityRepository>().watchByVenture(widget.venture.id),
             builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return const EmptyView(
+                  message: 'Could not load roles. Please try again.',
+                  icon: Icons.error_outline,
+                );
+              }
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }

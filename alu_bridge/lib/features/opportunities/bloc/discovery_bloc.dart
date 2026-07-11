@@ -131,6 +131,7 @@ class DiscoveryBloc extends Bloc<DiscoveryEvent, DiscoveryState> {
     await _subscription?.cancel();
     _subscription = _opportunityRepository.watchLive().listen(
           (opportunities) => add(DiscoveryOpportunitiesUpdated(opportunities)),
+          onError: (_) => add(const DiscoveryOpportunitiesUpdated([])),
         );
   }
 

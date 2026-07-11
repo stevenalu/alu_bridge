@@ -23,6 +23,7 @@ class VentureCubit extends Cubit<VentureState> {
       : super(const VentureState()) {
     _subscription = ventureRepository.watchByFounder(founderUid).listen(
           (venture) => emit(VentureState(status: VentureStatus.loaded, venture: venture)),
+          onError: (_) => emit(const VentureState(status: VentureStatus.loaded)),
         );
   }
 
