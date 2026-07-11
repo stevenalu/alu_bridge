@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 import 'app.dart';
+import 'features/auth/data/auth_repository.dart';
 import 'firebase_options.dart';
 
 final sl = GetIt.instance;
@@ -21,6 +22,9 @@ void bootstrap() {
 
       sl.registerLazySingleton(() => FirebaseAuth.instance);
       sl.registerLazySingleton(() => FirebaseFirestore.instance);
+      sl.registerLazySingleton(
+        () => AuthRepository(auth: sl(), firestore: sl()),
+      );
 
       runApp(const AluBridgeApp());
     },
