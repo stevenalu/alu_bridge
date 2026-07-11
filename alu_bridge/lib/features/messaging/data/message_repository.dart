@@ -13,14 +13,18 @@ class MessageRepository {
 
   Future<Conversation> getOrCreateConversation({
     required String applicationId,
+    required String currentUid,
     required List<String> participants,
   }) async {
-    final existing = await _conversations
-        .where('applicationId', isEqualTo: applicationId)
-        .limit(1)
-        .get();
-    if (existing.docs.isNotEmpty) {
-      return Conversation.fromMap(existing.docs.first.data(), existing.docs.first.id);
+    // Firestore rejects list queries whose filters don't match what the
+    // security rule checks, even when every result would pass — so this
+    // filters on `participants` (like watchForUser) and matches the
+    // applicationId client-side instead of querying on it directly.
+    final mine = await _conversations.where('participants', arrayContains: currentUid).get();
+    final existing = mine.docs.where((doc) => doc.data()['applicationId'] == applicationId);
+    if (existing.isNotEmpty) {
+      final doc = existing.first;
+      return Conversation.fromMap(doc.data(), doc.id);
     }
 
     final doc = _conversations.doc();

@@ -38,7 +38,7 @@ class OpportunityCard extends StatelessWidget {
                   Container(width: 4, color: isSaved ? AppColors.navy : AppColors.red),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -66,9 +66,14 @@ class OpportunityCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(opportunity.title, style: AppTextStyles.h3),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 2),
+                          Text(
+                            opportunity.title.isEmpty ? 'Untitled role' : opportunity.title,
+                            style: AppTextStyles.h3,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
                           Wrap(
                             spacing: 6,
                             runSpacing: 6,

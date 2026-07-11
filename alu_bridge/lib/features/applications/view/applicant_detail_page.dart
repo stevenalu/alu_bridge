@@ -28,20 +28,28 @@ class ApplicantDetailPage extends StatelessWidget {
 
   Future<void> _openChat(BuildContext context) async {
     final founderUid = context.read<AuthBloc>().state.user!.uid;
-    final conversation = await sl<MessageRepository>().getOrCreateConversation(
-      applicationId: applicant.id,
-      participants: [founderUid, applicant.studentUid],
-    );
-    if (!context.mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ChatPage(
-          conversationId: conversation.id,
-          currentUid: founderUid,
-          title: applicant.studentName,
+    try {
+      final conversation = await sl<MessageRepository>().getOrCreateConversation(
+        applicationId: applicant.id,
+        currentUid: founderUid,
+        participants: [founderUid, applicant.studentUid],
+      );
+      if (!context.mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ChatPage(
+            conversationId: conversation.id,
+            currentUid: founderUid,
+            title: applicant.studentName,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open this conversation. Please try again.')),
+      );
+    }
   }
 
   @override

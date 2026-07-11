@@ -28,29 +28,39 @@ class ApplicationDetailPage extends StatelessWidget {
 
   Future<void> _openChat(BuildContext context) async {
     final studentUid = context.read<AuthBloc>().state.user!.uid;
-    final venture = await sl<VentureRepository>().fetchById(application.ventureId);
-    if (venture == null || !context.mounted) return;
+    try {
+      final venture = await sl<VentureRepository>().fetchById(application.ventureId);
+      if (venture == null) {
+        throw StateError('Venture not found');
+      }
 
-    final conversation = await sl<MessageRepository>().getOrCreateConversation(
-      applicationId: application.id,
-      participants: [studentUid, venture.founderUid],
-    );
-    if (!context.mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ChatPage(
-          conversationId: conversation.id,
-          currentUid: studentUid,
-          title: venture.name,
+      final conversation = await sl<MessageRepository>().getOrCreateConversation(
+        applicationId: application.id,
+        currentUid: studentUid,
+        participants: [studentUid, venture.founderUid],
+      );
+      if (!context.mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ChatPage(
+            conversationId: conversation.id,
+            currentUid: studentUid,
+            title: venture.name,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open this conversation. Please try again.')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(application.oppTitle)),
+      appBar: AppBar(title: Text(application.displayTitle)),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [

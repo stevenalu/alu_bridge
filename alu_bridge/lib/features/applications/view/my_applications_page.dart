@@ -73,7 +73,7 @@ class _ApplicationTile extends StatelessWidget {
           children: [
             Row(
               children: [
-                Expanded(child: Text(application.oppTitle, style: AppTextStyles.h3)),
+                Expanded(child: Text(application.displayTitle, style: AppTextStyles.h3)),
                 MatchChip(percent: application.matchScore),
               ],
             ),

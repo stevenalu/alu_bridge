@@ -65,6 +65,8 @@ class Application extends Equatable {
     );
   }
 
+  String get displayTitle => oppTitle.isEmpty ? 'Untitled role' : oppTitle;
+
   final String id;
   final String oppId;
   final String oppTitle;

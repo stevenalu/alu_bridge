@@ -6,6 +6,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/empty_view.dart';
 import '../../../core/widgets/loading_list.dart';
 import '../../applications/data/application_repository.dart';
+import '../../ventures/data/venture_repository.dart';
 import '../data/message_repository.dart';
 import '../models/conversation.dart';
 import 'chat_page.dart';
@@ -47,18 +48,44 @@ class ConversationsPage extends StatelessWidget {
   }
 }
 
+class _ConversationInfo {
+  const _ConversationInfo({required this.counterpartName, required this.roleTitle});
+
+  final String counterpartName;
+  final String roleTitle;
+}
+
 class _ConversationTile extends StatelessWidget {
   const _ConversationTile({required this.conversation, required this.currentUid});
 
   final Conversation conversation;
   final String currentUid;
 
+  Future<_ConversationInfo> _load() async {
+    final application = await sl<ApplicationRepository>().fetchById(conversation.applicationId);
+    if (application == null) {
+      return const _ConversationInfo(counterpartName: 'Conversation', roleTitle: '');
+    }
+    if (currentUid == application.studentUid) {
+      final venture = await sl<VentureRepository>().fetchById(application.ventureId);
+      return _ConversationInfo(
+        counterpartName: venture?.name ?? 'Venture',
+        roleTitle: application.displayTitle,
+      );
+    }
+    return _ConversationInfo(
+      counterpartName: application.studentName,
+      roleTitle: application.displayTitle,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: sl<ApplicationRepository>().fetchById(conversation.applicationId),
+    return FutureBuilder<_ConversationInfo>(
+      future: _load(),
       builder: (context, snapshot) {
-        final title = snapshot.data?.oppTitle ?? 'Conversation';
+        final info = snapshot.data ??
+            const _ConversationInfo(counterpartName: 'Conversation', roleTitle: '');
         return InkWell(
           borderRadius: BorderRadius.circular(18),
           onTap: () => Navigator.of(context).push(
@@ -66,7 +93,7 @@ class _ConversationTile extends StatelessWidget {
               builder: (_) => ChatPage(
                 conversationId: conversation.id,
                 currentUid: currentUid,
-                title: title,
+                title: info.counterpartName,
               ),
             ),
           ),
@@ -80,7 +107,11 @@ class _ConversationTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyles.h3),
+                Text(info.counterpartName, style: AppTextStyles.h3),
+                if (info.roleTitle.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(info.roleTitle, style: AppTextStyles.tiny),
+                ],
                 if (conversation.lastMessage.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(

@@ -26,6 +26,10 @@ class ChatMessagesUpdated extends ChatEvent {
   List<Object?> get props => [messages];
 }
 
+class ChatLoadFailed extends ChatEvent {
+  const ChatLoadFailed();
+}
+
 class ChatMessageSent extends ChatEvent {
   const ChatMessageSent(this.body);
 
@@ -36,12 +40,14 @@ class ChatMessageSent extends ChatEvent {
 }
 
 class ChatState extends Equatable {
-  const ChatState({this.messages = const []});
+  const ChatState({this.messages = const [], this.loadError = false, this.sendError});
 
   final List<Message> messages;
+  final bool loadError;
+  final String? sendError;
 
   @override
-  List<Object?> get props => [messages];
+  List<Object?> get props => [messages, loadError, sendError];
 }
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
@@ -55,6 +61,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         super(const ChatState()) {
     on<ChatSubscriptionRequested>(_onSubscriptionRequested);
     on<ChatMessagesUpdated>(_onMessagesUpdated);
+    on<ChatLoadFailed>(_onLoadFailed);
     on<ChatMessageSent>(_onMessageSent);
   }
 
@@ -70,7 +77,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     await _subscription?.cancel();
     _subscription = _messageRepository.watchMessages(_conversationId).listen(
           (messages) => add(ChatMessagesUpdated(messages)),
-          onError: (_) => add(const ChatMessagesUpdated([])),
+          onError: (_) => add(const ChatLoadFailed()),
         );
   }
 
@@ -78,12 +85,27 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     emit(ChatState(messages: event.messages));
   }
 
-  Future<void> _onMessageSent(ChatMessageSent event, Emitter<ChatState> emit) {
-    return _messageRepository.sendMessage(
-      conversationId: _conversationId,
-      senderUid: _senderUid,
-      body: event.body,
-    );
+  void _onLoadFailed(ChatLoadFailed event, Emitter<ChatState> emit) {
+    emit(const ChatState(loadError: true));
+  }
+
+  Future<void> _onMessageSent(ChatMessageSent event, Emitter<ChatState> emit) async {
+    try {
+      await _messageRepository.sendMessage(
+        conversationId: _conversationId,
+        senderUid: _senderUid,
+        body: event.body,
+      );
+      emit(ChatState(messages: state.messages, loadError: state.loadError));
+    } catch (_) {
+      emit(
+        ChatState(
+          messages: state.messages,
+          loadError: state.loadError,
+          sendError: 'Could not send that message. Please try again.',
+        ),
+      );
+    }
   }
 
   @override

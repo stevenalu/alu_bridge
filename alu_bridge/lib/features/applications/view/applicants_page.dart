@@ -98,9 +98,17 @@ class _ApplicantTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(18),
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => ApplicantDetailPage(applicant: applicant)),
-      ),
+      onTap: () {
+        final applicantsBloc = context.read<ApplicantsBloc>();
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: applicantsBloc,
+              child: ApplicantDetailPage(applicant: applicant),
+            ),
+          ),
+        );
+      },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(

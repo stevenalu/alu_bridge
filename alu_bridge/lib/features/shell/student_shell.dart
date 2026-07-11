@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../bootstrap.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/primary_button.dart';
 import '../applications/bloc/applications_bloc.dart';
 import '../applications/data/application_repository.dart';
@@ -16,6 +17,7 @@ import '../opportunities/view/discover_page.dart';
 import '../opportunities/view/explore_page.dart';
 import '../profile/cubit/profile_cubit.dart';
 import '../profile/data/profile_repository.dart';
+import '../profile/models/student_profile.dart';
 import '../profile/view/build_profile_page.dart';
 import '../profile/view/settings_page.dart';
 
@@ -85,7 +87,7 @@ class _StudentShellState extends State<StudentShell> {
           1 => const ExplorePage(),
           2 => const MyApplicationsPage(),
           3 => ConversationsPage(currentUid: context.read<AuthBloc>().state.user!.uid),
-          4 => const SettingsPage(),
+          4 => const _ProfileTab(),
           _ => Center(child: Text(_tabs[_index])),
         },
         bottomNavigationBar: NavigationBar(
@@ -103,35 +105,93 @@ class _StudentShellState extends State<StudentShell> {
   }
 }
 
-class _HomeTab extends StatelessWidget {
+class _HomeTab extends StatefulWidget {
   const _HomeTab();
+
+  @override
+  State<_HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<_HomeTab> {
+  late Future<StudentProfile?> _profileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileFuture = _loadProfile();
+  }
+
+  Future<StudentProfile?> _loadProfile() {
+    final uid = context.read<AuthBloc>().state.user!.uid;
+    return sl<ProfileRepository>().fetch(uid);
+  }
+
+  Future<void> _openBuildProfile() async {
+    final uid = context.read<AuthBloc>().state.user!.uid;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (_) => ProfileCubit(profileRepository: sl<ProfileRepository>(), uid: uid),
+          child: const BuildProfilePage(),
+        ),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _profileFuture = _loadProfile());
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: PrimaryButton(
-            label: 'Build your profile',
-            onPressed: () {
-              final uid = context.read<AuthBloc>().state.user!.uid;
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => BlocProvider(
-                    create: (_) => ProfileCubit(
-                      profileRepository: sl<ProfileRepository>(),
-                      uid: uid,
-                    ),
-                    child: const BuildProfilePage(),
-                  ),
-                ),
-              );
-            },
-          ),
+        FutureBuilder<StudentProfile?>(
+          future: _profileFuture,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData || snapshot.data != null) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: PrimaryButton(
+                label: 'Build your profile',
+                onPressed: _openBuildProfile,
+              ),
+            );
+          },
         ),
         const Expanded(child: DiscoverPage()),
       ],
+    );
+  }
+}
+
+class _ProfileTab extends StatelessWidget {
+  const _ProfileTab();
+
+  @override
+  Widget build(BuildContext context) {
+    final user = context.watch<AuthBloc>().state.user;
+
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (user != null) ...[
+            Text(user.fullName, style: AppTextStyles.h2),
+            const SizedBox(height: 4),
+            Text(user.email, style: AppTextStyles.sub),
+            const SizedBox(height: 20),
+          ],
+          OutlinedButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SettingsPage()),
+            ),
+            style: OutlinedButton.styleFrom(foregroundColor: AppColors.navy),
+            child: const Text('Account settings'),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -25,7 +25,7 @@ class ApplicationSentPage extends StatelessWidget {
               Text('Application sent!', style: AppTextStyles.h1, textAlign: TextAlign.center),
               const SizedBox(height: 8),
               Text(
-                'Your application to ${application.oppTitle} is on its way. '
+                'Your application to ${application.displayTitle} is on its way. '
                 'Track its status from the Applications tab.',
                 style: AppTextStyles.sub,
                 textAlign: TextAlign.center,
