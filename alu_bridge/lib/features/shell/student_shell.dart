@@ -9,6 +9,7 @@ import '../applications/data/application_repository.dart';
 import '../applications/view/my_applications_page.dart';
 import '../auth/bloc/auth_bloc.dart';
 import '../auth/bloc/auth_event.dart';
+import '../messaging/view/conversations_page.dart';
 import '../opportunities/bloc/discovery_bloc.dart';
 import '../opportunities/data/opportunity_repository.dart';
 import '../opportunities/view/discover_page.dart';
@@ -16,6 +17,7 @@ import '../opportunities/view/explore_page.dart';
 import '../profile/cubit/profile_cubit.dart';
 import '../profile/data/profile_repository.dart';
 import '../profile/view/build_profile_page.dart';
+import '../profile/view/settings_page.dart';
 
 class StudentShell extends StatefulWidget {
   const StudentShell({super.key});
@@ -82,6 +84,8 @@ class _StudentShellState extends State<StudentShell> {
           0 => const _HomeTab(),
           1 => const ExplorePage(),
           2 => const MyApplicationsPage(),
+          3 => ConversationsPage(currentUid: context.read<AuthBloc>().state.user!.uid),
+          4 => const SettingsPage(),
           _ => Center(child: Text(_tabs[_index])),
         },
         bottomNavigationBar: NavigationBar(

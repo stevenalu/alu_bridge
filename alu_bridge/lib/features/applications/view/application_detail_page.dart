@@ -1,14 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bootstrap.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/primary_button.dart';
+import '../../auth/bloc/auth_bloc.dart';
+import '../../messaging/data/message_repository.dart';
+import '../../messaging/view/chat_page.dart';
 import '../../opportunities/widgets/match_chip.dart';
+import '../../ventures/data/venture_repository.dart';
 import '../models/application.dart';
+import '../models/application_status.dart';
 import '../widgets/status_timeline.dart';
 
 class ApplicationDetailPage extends StatelessWidget {
   const ApplicationDetailPage({required this.application, super.key});
 
   final Application application;
+
+  bool get _canMessage => switch (application.status) {
+        ApplicationStatus.shortlisted ||
+        ApplicationStatus.interview ||
+        ApplicationStatus.offer =>
+          true,
+        _ => false,
+      };
+
+  Future<void> _openChat(BuildContext context) async {
+    final studentUid = context.read<AuthBloc>().state.user!.uid;
+    final venture = await sl<VentureRepository>().fetchById(application.ventureId);
+    if (venture == null || !context.mounted) return;
+
+    final conversation = await sl<MessageRepository>().getOrCreateConversation(
+      applicationId: application.id,
+      participants: [studentUid, venture.founderUid],
+    );
+    if (!context.mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChatPage(
+          conversationId: conversation.id,
+          currentUid: studentUid,
+          title: venture.name,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +71,13 @@ class ApplicationDetailPage extends StatelessWidget {
           Text('Status', style: AppTextStyles.h3),
           const SizedBox(height: 12),
           StatusTimeline(timeline: application.timeline),
+          if (_canMessage) ...[
+            const SizedBox(height: 12),
+            PrimaryButton(
+              label: 'Message venture',
+              onPressed: () => _openChat(context),
+            ),
+          ],
         ],
       ),
     );
