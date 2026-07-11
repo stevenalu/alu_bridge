@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/status_pill.dart';
 import '../../../core/widgets/verified_badge.dart';
+import '../../applications/view/apply_page.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../auth/models/app_user.dart';
 import '../data/opportunity_repository.dart';
@@ -90,7 +91,13 @@ class OpportunityDetailPage extends StatelessWidget {
           else
             PrimaryButton(
               label: 'Apply now',
-              onPressed: opportunity.status == OpportunityStatus.live ? () {} : null,
+              onPressed: opportunity.status == OpportunityStatus.live
+                  ? () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ApplyPage(opportunity: opportunity),
+                        ),
+                      )
+                  : null,
             ),
         ],
       ),
