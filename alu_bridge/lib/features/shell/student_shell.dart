@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../bootstrap.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/primary_button.dart';
 import '../auth/bloc/auth_bloc.dart';
 import '../auth/bloc/auth_event.dart';
+import '../profile/cubit/profile_cubit.dart';
+import '../profile/data/profile_repository.dart';
+import '../profile/view/build_profile_page.dart';
 
 class StudentShell extends StatefulWidget {
   const StudentShell({super.key});
@@ -36,7 +41,7 @@ class _StudentShellState extends State<StudentShell> {
           ),
         ],
       ),
-      body: Center(child: Text(_tabs[_index])),
+      body: _index == 0 ? const _HomeTab() : Center(child: Text(_tabs[_index])),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (index) => setState(() => _index = index),
@@ -45,6 +50,39 @@ class _StudentShellState extends State<StudentShell> {
         destinations: [
           for (var i = 0; i < _tabs.length; i++)
             NavigationDestination(icon: Icon(_icons[i]), label: _tabs[i]),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeTab extends StatelessWidget {
+  const _HomeTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          PrimaryButton(
+            label: 'Build your profile',
+            onPressed: () {
+              final uid = context.read<AuthBloc>().state.user!.uid;
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider(
+                    create: (_) => ProfileCubit(
+                      profileRepository: sl<ProfileRepository>(),
+                      uid: uid,
+                    ),
+                    child: const BuildProfilePage(),
+                  ),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

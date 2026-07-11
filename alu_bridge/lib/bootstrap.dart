@@ -8,6 +8,8 @@ import 'package:get_it/get_it.dart';
 
 import 'app.dart';
 import 'features/auth/data/auth_repository.dart';
+import 'features/profile/data/profile_repository.dart';
+import 'features/ventures/data/venture_repository.dart';
 import 'firebase_options.dart';
 
 final sl = GetIt.instance;
@@ -25,6 +27,8 @@ void bootstrap() {
       sl.registerLazySingleton(
         () => AuthRepository(auth: sl(), firestore: sl()),
       );
+      sl.registerLazySingleton(() => ProfileRepository(firestore: sl()));
+      sl.registerLazySingleton(() => VentureRepository(firestore: sl()));
 
       runApp(const AluBridgeApp());
     },
