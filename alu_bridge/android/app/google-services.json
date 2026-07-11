@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "987865982416",
+    "project_id": "alu-bridge-c83f0",
+    "storage_bucket": "alu-bridge-c83f0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:987865982416:android:35146997e441ea8a6185d5",
+        "android_client_info": {
+          "package_name": "com.example.alu_bridge"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEUNeSyTKlwH5aqnH0FLBmoh49CdW7zYc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
