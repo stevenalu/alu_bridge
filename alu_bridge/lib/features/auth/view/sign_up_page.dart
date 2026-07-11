@@ -39,9 +39,9 @@ class _SignUpPageState extends State<SignUpPage> {
     setState(() {
       _fullNameError =
           _fullNameController.text.trim().isEmpty ? 'Enter your full name' : null;
-      _emailError = _isValidEmail(_emailController.text.trim())
+      _emailError = _isAluStudentEmail(_emailController.text.trim())
           ? null
-          : 'Enter a valid email address';
+          : 'Use your ALU student email, e.g. yourname@alustudent.com';
       _passwordError = _passwordController.text.length < 6
           ? 'Password must be at least 6 characters'
           : null;
@@ -116,4 +116,5 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 }
 
-bool _isValidEmail(String value) => RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value);
+bool _isAluStudentEmail(String value) =>
+    RegExp(r'^[^@\s]+@alustudent\.com$', caseSensitive: false).hasMatch(value);
