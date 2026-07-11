@@ -16,4 +16,11 @@ class ProfileRepository {
   Future<void> save(StudentProfile profile) {
     return _firestore.collection('students').doc(profile.uid).set(profile.toMap());
   }
+
+  Future<void> setRoleSaved(String uid, String oppId, bool saved) {
+    return _firestore.collection('students').doc(uid).update({
+      'savedRoles':
+          saved ? FieldValue.arrayUnion([oppId]) : FieldValue.arrayRemove([oppId]),
+    });
+  }
 }
